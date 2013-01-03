@@ -17,7 +17,7 @@ import numpy as np
 
 
 def ngm(alpha=.36, delta=.08, v_0=.01, k_n=100, k_l=.01, k_u=10,
-    epsilon=.00005, z=1):
+    epsilon=.00005, z=1, u=np.log, f=None):
     """
     """
     k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
@@ -26,14 +26,7 @@ def ngm(alpha=.36, delta=.08, v_0=.01, k_n=100, k_l=.01, k_u=10,
 
     f = lambda k: k ** alpha
 
-    def u(k, k_prime):
-        """Utility function.
-        TODO: Move to a parameter w/ some checks.
-        """
-        c = z * f(k) + (1 - delta) * k - k_prime
-        if c < 0:
-            return -100000
-        else:
-            return (c, np.log(c))
+    c = z * f(k_grid) + (1 - delta) * k - k_grid
+    utility = u(c)
 
     while e > epsilon:
