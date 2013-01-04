@@ -1,14 +1,5 @@
 
 """
-http://www.compmacro.com/makoto/note/note_ngm_disc.pdf
-
-Exogenous Parameters
-
-* k_n : number of grid points
-* k_l : lower bound on capital stock
-* k_u : upper boind on capital stock
-* epsilon : upper bound on error
-* v_0 : initial guess.
 """
 
 from __future__ import division
@@ -19,6 +10,20 @@ import matplotlib.pyplot as plt
 
 class NGM(object):
     """Calculate a neoclassical growth model using value function iteration.
+    http://www.compmacro.com/makoto/note/note_ngm_disc.pdf
+
+    Exogenous Parameters
+
+    * k_n : number of grid points
+    * k_l : lower bound on capital stock
+    * k_u : upper boind on capital stock
+    * epsilon : upper bound on error
+    * v_0 : initial guess.
+    * detla: depreciation rate of capital
+    * epsilon: tolerance of error
+    * u: a utility function*
+    * z: currently a placeholder for some stochastic shock matrix.
+
     """
     def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=100,
         k_l=.01, k_u=30, epsilon=.00005, z=1, u=np.log, f=None,
