@@ -40,7 +40,8 @@ class NGM(object):
                     'z': z,
                     'u': u,
                     'f': f,
-                    'max_iter': max_iter
+                    'max_iter': max_iter,
+                    'v_0': v_0
                     }
 
     def ngm(self, **kwargs):
@@ -48,7 +49,7 @@ class NGM(object):
         Call like vf, pr = NGM.ngm()
 
         TODO: Takes args from self.params as a dict
-        TODO: check on v_0; right now assuming all 0.
+        TODO: Improve v_0 handling.  Right now just allows for singl value.
         """
         k_l = self.params['k_l']
         k_u = self.params['k_u']
@@ -60,6 +61,7 @@ class NGM(object):
         epsilon = self.params['epsilon']
         u = self.params['u']
         max_iter = self.params['max_iter']
+        v_0 = self.params['v_0']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
         k_grid = np.tile(k_v, (k_n, 1)).T
@@ -72,7 +74,7 @@ class NGM(object):
 
         e = 1
         iteration = 0
-        value_function = np.zeros(k_n)
+        value_function = np.ones(k_n) * v_0
         new_value_function = np.zeros(k_n)
         policy_rule = np.zeros(k_n)
 
