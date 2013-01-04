@@ -44,9 +44,14 @@ class NGM(object):
                     'v_0': v_0
                     }
 
-    def ngm(self, **kwargs):
+    def ngm(self, alt=False, **kwargs):
         """
         Call like vf, pr = NGM.ngm()
+
+        If alt, calculation of c & u is done in loop. Else it is done before.
+        Getting different results since the updateding of value_function occurs
+        at different times. Alt fixes value_function and loops over each k.
+        Non-alt updates value_function after each iteration.  Lean toward alt?
 
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for singl value.
@@ -68,28 +73,46 @@ class NGM(object):
 
         f = lambda k: k ** alpha
 
-        c = z * f(k_grid) + (1 - delta) * k_grid - k_grid.T
-        utility = u(c)
-        utility[c <= 0] = -100000
-
         e = 1
         iteration = 0
         value_function = np.ones(k_n) * v_0
         new_value_function = np.zeros(k_n)
         policy_rule = np.zeros(k_n)
 
-        while e > epsilon and iteration < max_iter:
-            for i in range(k_n):
-                temp = utility[i, :] + beta * value_function.T
-                ind = np.argmax(temp)
-                temp_vf = np.max(temp)
-                policy_rule[i] = k_v[ind]
-                new_value_function[i] = temp_vf
+        if not alt:
+            c = z * f(k_grid) + (1 - delta) * k_grid - k_grid.T
+            utility = u(c)
+            utility[c <= 0] = -100000
+
+            while e > epsilon and iteration < max_iter:
+                for i in range(k_n):
+                    temp = utility[i, :] + beta * value_function.T
+                    ind = np.argmax(temp)
+                    temp_vf = temp[ind]
+                    policy_rule[i] = k_v[ind]
+                    new_value_function[i] = temp_vf
+
+                    e = np.max(np.abs(value_function - new_value_function))
+                    iteration += 1
+                    value_function = new_value_function
+        else:
+            while e > epsilon and iteration < max_iter:
+                for i, v in enumerate(k_grid):
+                    c = z * f(v) + (1 - delta) * v - k_v
+                    utility = u(c)
+                    utility[c <= 0] = -100000
+                    temp = utility + beta * value_function
+                    ind = np.argmax(temp)
+                    temp_vf = temp[ind]
+                    policy_rule[i] = k_v[ind]
+                    new_value_function[i] = temp_vf
 
                 e = np.max(np.abs(value_function - new_value_function))
                 iteration += 1
                 value_function = new_value_function
 
+        print e
+        print iteration
         return (value_function, policy_rule)
 
     def gen_plots(self, value_function, policy_rule):
