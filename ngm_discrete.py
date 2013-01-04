@@ -1,5 +1,5 @@
-
 """
+A collection of techniques to model standard neoclassical growth models.
 """
 
 from __future__ import division
@@ -17,12 +17,13 @@ class NGM(object):
     * k_n : number of grid points
     * k_l : lower bound on capital stock
     * k_u : upper boind on capital stock
-    * epsilon : upper bound on error
     * v_0 : initial guess.
     * detla: depreciation rate of capital
-    * epsilon: tolerance of error
-    * u: a utility function*
+    * u: a utility function
+    * f: a production function
     * z: currently a placeholder for some stochastic shock matrix.
+    * epsilon: tolerance of error
+    * mat_iter: Non-economic.  In case something is diverging.
 
     """
     def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=100,
