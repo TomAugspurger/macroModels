@@ -99,3 +99,7 @@ class NGM(object):
         ax2 = fig.add_subplot(2, 1, 2)
         ax2.plot(policy_rule)
         return fig
+
+
+if __name__ == "main":
+    pass
