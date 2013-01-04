@@ -99,7 +99,8 @@ class NGM(object):
                     value_function = new_value_function
         else:
             while e > epsilon and iteration < max_iter:
-                for i, v in enumerate(k_grid):
+                # No need for k_grid. k_v will broadcast.
+                for i, v in enumerate(k_v):
                     if rep == n_h or iteration == 0:
                         c = z * f(v) + (1 - delta) * v - k_v
                         utility = u(c)
