@@ -28,7 +28,7 @@ class NGM(object):
     """
     def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=100,
         k_l=.01, k_u=30, epsilon=.00005, z=1, u=np.log, f=None,
-        max_iter=1000):
+        max_iter=1000, n_h=1):
         self.params = {'alpha': alpha,
                     'beta': beta,
                     'delta': delta,
@@ -41,8 +41,8 @@ class NGM(object):
                     'u': u,
                     'f': f,
                     'max_iter': max_iter,
-                    'v_0': v_0
-                    }
+                    'v_0': v_0,
+                    'n_h': n_h}
 
     def ngm(self, alt=False, **kwargs):
         """
@@ -53,6 +53,7 @@ class NGM(object):
         at different times. Alt fixes value_function and loops over each k.
         Non-alt updates value_function after each iteration.  Lean toward alt?
 
+        Non-alt running a bit under 3x slower.
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for singl value.
         """
@@ -67,6 +68,7 @@ class NGM(object):
         u = self.params['u']
         max_iter = self.params['max_iter']
         v_0 = self.params['v_0']
+        n_h = self.params['n_h']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
         k_grid = np.tile(k_v, (k_n, 1)).T
@@ -74,11 +76,11 @@ class NGM(object):
         f = lambda k: k ** alpha
 
         e = 1
+        rep = 1
         iteration = 0
         value_function = np.ones(k_n) * v_0
         new_value_function = np.zeros(k_n)
         policy_rule = np.zeros(k_n)
-
         if not alt:
             c = z * f(k_grid) + (1 - delta) * k_grid - k_grid.T
             utility = u(c)
@@ -98,13 +100,17 @@ class NGM(object):
         else:
             while e > epsilon and iteration < max_iter:
                 for i, v in enumerate(k_grid):
-                    c = z * f(v) + (1 - delta) * v - k_v
-                    utility = u(c)
-                    utility[c <= 0] = -100000
-                    temp = utility + beta * value_function
-                    ind = np.argmax(temp)
+                    if rep == n_h or iteration == 0:
+                        c = z * f(v) + (1 - delta) * v - k_v
+                        utility = u(c)
+                        utility[c <= 0] = -100000
+                        temp = utility + beta * value_function
+                        ind = np.argmax(temp)
+                        policy_rule[i] = k_v[ind]
+                        rep = 1
+                    else:
+                        rep += 1
                     temp_vf = temp[ind]
-                    policy_rule[i] = k_v[ind]
                     new_value_function[i] = temp_vf
 
                 e = np.max(np.abs(value_function - new_value_function))
