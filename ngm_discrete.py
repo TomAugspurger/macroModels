@@ -105,18 +105,18 @@ class NGM(object):
                         c = z * f(v) + (1 - delta) * v - k_v
                         utility = u(c)
                         utility[c <= 0] = -100000
-                        temp_6 = utility + beta * new_value_function_5
-                        ind_6 = np.argmax(temp_6)
-                        policy_rule_6[i] = k_v[ind_6]
+                        temp_8 = utility + beta * new_value_function_7
+                        ind_8 = np.argmax(temp_8)
+                        policy_rule_8[i] = k_v[ind_8]
                         rep = 1
                     else:
                         rep += 1
-                    temp_vf_6 = temp_6[ind_6]
-                    new_value_function_6[i] = temp_vf_6
+                    temp_vf_8 = temp_8[ind_8]
+                    new_value_function_8[i] = temp_vf_8
 
-                e_6 = np.max(np.abs(new_value_function_5 - new_value_function_6))
+                e_8 = np.max(np.abs(new_value_function_7 - new_value_function_8))
                 iteration += 1
-                value_function_5 = value_function_5
+                value_function_7 = value_function_7
                 print "For iteration %i, the error is %i" % (iteration, e)
 
         return (value_function, policy_rule)
@@ -151,28 +151,28 @@ def fill_zeros(*args):
         arg = np.zeros(k_n)
         return arg
 
-In [33]: policy_rule_5 = np.zeros(k_n)
+In [33]: policy_rule_7 = np.zeros(k_n)
 
-In [34]: policy_rule_5 = np.zeros(k_n)
+In [34]: policy_rule_7 = np.zeros(k_n)
 
-In [35]: policy_rule_5 = np.zeros(k_n)
+In [35]: policy_rule_7 = np.zeros(k_n)
 
-In [36]: policy_rule_6 = np.zeros(k_n)
+In [36]: policy_rule_7 = np.zeros(k_n)
 
 In [37]: policy_rule_7 = np.zeros(k_n)
 
 In [38]: policy_rule_8 = np.zeros(k_n)
 
 In [39]: new_va
-new_value_function    new_value_function_1  new_value_function_5  
+new_value_function    new_value_function_1  new_value_function_7  
 
-In [39]: new_value_function_5 = np.zeros(k_n)
+In [39]: new_value_function_7 = np.zeros(k_n)
 
-In [40]: new_value_function_5 = np.zeros(k_n)
+In [40]: new_value_function_7 = np.zeros(k_n)
 
-In [41]: new_value_function_5 = np.zeros(k_n)
+In [41]: new_value_function_7 = np.zeros(k_n)
 
-In [42]: new_value_function_6 = np.zeros(k_n)
+In [42]: new_value_function_7 = np.zeros(k_n)
 
 In [43]: new_value_function_7 = np.zeros(k_n)
 
