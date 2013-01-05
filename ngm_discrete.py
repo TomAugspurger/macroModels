@@ -117,6 +117,7 @@ class NGM(object):
                 e = np.max(np.abs(value_function - new_value_function))
                 iteration += 1
                 value_function = new_value_function
+                print "For iteration %i, the error is %i" % (iteration, e)
 
         print e
         print iteration
