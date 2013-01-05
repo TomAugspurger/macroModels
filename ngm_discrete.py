@@ -111,9 +111,9 @@ class NGM(object):
         """
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 1, 1)
-        ax1.plot(value_function)
+        ax1.plot(self.params['k_v'], value_function)
         ax2 = fig.add_subplot(2, 1, 2)
-        ax2.plot(policy_rule)
+        ax2.plot(self.params['k_v'], policy_rule)
         return fig
 
 
