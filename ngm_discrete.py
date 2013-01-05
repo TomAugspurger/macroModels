@@ -109,11 +109,15 @@ class NGM(object):
     def gen_plots(self, value_function, policy_rule):
         """Get a plot of the value function & policy rules.
         """
+        k_l = self.params['k_l']
+        k_u = self.params['k_u']
+        k_n = self.params['k_n']
+        k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
         fig = plt.figure()
         ax1 = fig.add_subplot(2, 1, 1)
-        ax1.plot(self.params['k_v'], value_function)
+        ax1.plot(k_v, value_function)
         ax2 = fig.add_subplot(2, 1, 2)
-        ax2.plot(self.params['k_v'], policy_rule)
+        ax2.plot(k_v, policy_rule)
         return fig
 
 
