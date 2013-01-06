@@ -1,5 +1,11 @@
 """
-A collection of techniques to model standard neoclassical growth models.
+A collection of techniques to model standard neoclassical growth models via
+discretization.
+
+Currently supports:
+
+    -Value Function iteration
+    -Howard's Improvement Algorithm (need to test).
 """
 
 from __future__ import division
