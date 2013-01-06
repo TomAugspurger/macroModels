@@ -118,6 +118,12 @@ class NGM(object):
         ax1.plot(k_v, value_function)
         ax2 = fig.add_subplot(2, 1, 2)
         ax2.plot(k_v, policy_rule)
+
+        ax1.grid()
+        ax2.grid()
+        ax1.set_ylabel('Value')
+        ax2.set_xlabel('Capital Stock')
+        ax2.set_ylabel('Capital Choice')
         return fig
 
 
