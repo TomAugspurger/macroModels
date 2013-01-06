@@ -61,7 +61,7 @@ class NGM(object):
 
         Non-alt running a bit under 3x slower.
         TODO: Takes args from self.params as a dict
-        TODO: Improve v_0 handling.  Right now just allows for singl value.
+        TODO: Improve v_0 handling.  Right now just allows for single value.
         """
         k_l = self.params['k_l']
         k_u = self.params['k_u']
@@ -88,7 +88,6 @@ class NGM(object):
         policy_rule = np.zeros(k_n)
 
         while e > epsilon and iteration < max_iter:
-            # No need for k_grid. k_v will broadcast.
             for i, v in enumerate(k_v):
                 if rep == n_h or iteration == 0:
                     c = z * f(v) + (1 - delta) * v - k_v
