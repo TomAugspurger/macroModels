@@ -121,6 +121,8 @@ class NGM(object):
 
         ax1.grid()
         ax2.grid()
+
+        ax1.set_title('Value Function and Policy Rule')
         ax1.set_ylabel('Value')
         ax2.set_xlabel('Capital Stock')
         ax2.set_ylabel('Capital Choice')
