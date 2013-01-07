@@ -96,8 +96,10 @@ class NGM(object):
         self._is_stochastic = None
         self.is_monotonic = None
         self.boundry_warning = False
+        self.error = None
+        self.iterations = None
 
-    def ngm(self, **kwargs):
+    def ngm(self, alt=False, **kwargs):
         """
         Call like vf, pr = NGM.ngm()
 
