@@ -100,6 +100,7 @@ class NGM(object):
                     if ind in [0, k_n - 1] and iteration > 0:
                         print("Boundry Warning.  Chose %i on iteration %i"
                             % (ind, iteration))
+                        self.boundry_warning = True
                 else:
                     rep += 1
                 temp_vf = temp[ind]
