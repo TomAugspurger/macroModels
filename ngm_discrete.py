@@ -49,6 +49,11 @@ class NGM(object):
                     'max_iter': max_iter,
                     'v_0': v_0,
                     'n_h': n_h}
+        self.value_function = None
+        self.policy_rule = None
+        self._is_stochastic = None
+        self.is_monotonic = None
+        self.boundry_warning = False
 
     def ngm(self, **kwargs):
         """
@@ -114,6 +119,8 @@ class NGM(object):
 
         print e
         print iteration
+        self.value_function = value_function
+        self.policy_rule = policy_rule
         return (value_function, policy_rule)
 
     def gen_plots(self, value_function, policy_rule):
@@ -138,6 +145,11 @@ class NGM(object):
         ax2.set_ylabel('Capital Choice')
         return fig
 
+    def _is_monotonic(self, vf, pr):
+        """Check if the value function/policy rule is monotionic.
+        """
+        if sorted(vf) == vf and sorted(pr) == pr:
+            self.is_monotonic = True
 
 if __name__ == "main":
     pass
