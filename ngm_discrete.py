@@ -50,12 +50,11 @@ class NGM(object):
 
 
     """
-    def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=1000,
-        k_l=.05, k_u=30, epsilon=.00005, z=1, u=np.log, f=None,
-        max_iter=1000, n_h=1):
+    def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
+        k_l=.05, k_u=30, epsilon=.00005, z=1, u=(lambda x, h=.7, theta=.5:
+        theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
+        k ** alpha), max_iter=1000, n_h=1):
 
-        if not isinstance(alpha, (float, int)):
-            raise Exception('alpha must be a float or int.')
         if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
             raise Exception('Beta should be a number between zero and one.')
         if not isinstance(delta, (float, int)) or delta < 0 or delta > 1:
@@ -76,7 +75,7 @@ class NGM(object):
             raise Exception('Invlaid number for Howard\'s Improvement'\
              'Algorithm.')
 
-        self.params = {'alpha': alpha,
+        self.params = {
                     'beta': beta,
                     'delta': delta,
                     'v_0': v_0,
@@ -116,7 +115,6 @@ class NGM(object):
         k_l = self.params['k_l']
         k_u = self.params['k_u']
         k_n = self.params['k_n']
-        alpha = self.params['alpha']
         z = self.params['z']
         beta = self.params['beta']
         delta = self.params['delta']
@@ -125,8 +123,7 @@ class NGM(object):
         max_iter = self.params['max_iter']
         v_0 = self.params['v_0']
         n_h = self.params['n_h']
-
-        f = lambda k: k ** alpha
+        f = self.params['f']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         k_grid = np.tile(k_v, (k_n, 1)).T
