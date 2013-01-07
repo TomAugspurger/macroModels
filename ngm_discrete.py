@@ -2,10 +2,12 @@
 A collection of techniques to model standard neoclassical growth models via
 discretization.
 
-Currently supports:
+Currently supports non-stochastic versions of:
 
     -Value Function iteration
-    -Howard's Improvement Algorithm (need to test).
+    -Howard's Improvement Algorithm.
+
+See notes at http://www.compmacro.com/makoto/note/note_ngm_disc.pdf
 """
 
 from __future__ import division
@@ -20,16 +22,32 @@ class NGM(object):
 
     Exogenous Parameters
 
-    * k_n : number of grid points
-    * k_l : lower bound on capital stock
-    * k_u : upper boind on capital stock
-    * v_0 : initial guess.
+    * k_n: number of grid points
+    * k_l: lower bound on capital stock
+    * k_u: upper boind on capital stock
+    * v_0: initial guess.
     * detla: depreciation rate of capital
     * u: a utility function
     * f: a production function
     * z: currently a placeholder for some stochastic shock matrix.
     * epsilon: tolerance of error
-    * mat_iter: Non-economic.  In case something is diverging.
+    * max_iter: Non-economic.  In case something is diverging.
+    * n_h: Number of times to reuse current policy rule for value function
+        iteration if using Howard improvement algorithm.
+
+    Attributes
+    ----------
+    * ngm(): Solves problem and fills in some other attributes.
+    * gen_plots(): Produces plot of value function & policy rule
+        against the capital space.
+    * value_function: Steady state value function. Comes from ngm().
+    * policy_rule: Associated with value_function.
+    * _is_stochastic: Helper for when stochasticity support is added.
+    * is_monotonic: To be used for the monotonicity speed-up. More of a check.
+    * boundry_warning: Robustness check.  Warns if capital space is
+        restricting the optimal next period capital choice.
+
+
 
     """
     def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=1000,
