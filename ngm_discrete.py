@@ -125,9 +125,13 @@ class NGM(object):
         v_0 = self.params['v_0']
         n_h = self.params['n_h']
 
-        k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
-
         f = lambda k: k ** alpha
+
+        k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
+        k_grid = np.tile(k_v, (k_n, 1)).T
+        c = f(k_grid) + (1 - delta) * k_grid - k_grid.T
+        utility = u(c)
+        utility[c <= 0] = -100000
 
         e = 1
         rep = 1
@@ -139,10 +143,7 @@ class NGM(object):
         while e > epsilon and iteration < max_iter:
             for i, v in enumerate(k_v):
                 if rep == n_h or iteration == 0:
-                    c = z * f(v) + (1 - delta) * v - k_v
-                    utility = u(c)
-                    utility[c <= 0] = -100000
-                    temp = utility + beta * value_function
+                    temp = utility[i] + beta * value_function
                     ind = np.argmax(temp)
                     policy_rule[i] = k_v[ind]
                     rep = 1
@@ -154,15 +155,16 @@ class NGM(object):
                     rep += 1
                 temp_vf = temp[ind]
                 new_value_function[i] = temp_vf
-
             e = np.max(np.abs(value_function - new_value_function))
             iteration += 1
             value_function = np.copy(new_value_function)
             if iteration % 10 == 0:
                 print "For iteration %i, the error is %.6e" % (iteration, e)
 
-        print e
-        print iteration
+        print('The final error is %.6e.' % e)
+        print('Finished in %i iterations.' % iteration)
+        self.error = e
+        self.iterations = iteration
         self.value_function = value_function
         self.policy_rule = policy_rule
         return (value_function, policy_rule)
