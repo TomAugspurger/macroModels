@@ -97,6 +97,9 @@ class NGM(object):
                     ind = np.argmax(temp)
                     policy_rule[i] = k_v[ind]
                     rep = 1
+                    if ind in [0, k_n - 1] and iteration > 0:
+                        print("Boundry Warning.  Chose %i on iteration %i"
+                            % (ind, iteration))
                 else:
                     rep += 1
                 temp_vf = temp[ind]
