@@ -55,25 +55,26 @@ class NGM(object):
         max_iter=1000, n_h=1):
 
         if not isinstance(alpha, (float, int)):
-            raise Exception
-        if not isinstance(beta, (float, int)):
-            raise Exception
-        if not isinstance(delta, (float, int)):
-            raise Exception
+            raise Exception('alpha must be a float or int.')
+        if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
+            raise Exception('Beta should be a number between zero and one.')
+        if not isinstance(delta, (float, int)) or delta < 0 or delta > 1:
+            raise Exception('delta should be a number between zero and one.')
         if not isinstance(v_0, (float, int, list, np.ndarray)):
-            raise Exception
+            raise Exception('Invalid initial value function.')
         if not isinstance(k_n, int):
-            raise Exception
+            raise Exception('Invalid numper of points.  Must be an int.')
         if not isinstance(k_l, (float, int)):
-            raise Exception
+            raise Exception('Invalid lower bound.')
         if not isinstance(k_u, (float, int)):
-            raise Exception
+            raise Exception('Invalid upper bound.')
         if not isinstance(epsilon, (float, int)):
-            raise Exception
-        if not isinstance(max_iter, int):
-            raise Exception
+            raise Exception('Invalid tolerance level.')
+        if not isinstance(max_iter, (float, int)):
+            raise Exception('Invalid maximum iterations.')
         if not isinstance(n_h, int):
-            raise Exception
+            raise Exception('Invlaid number for Howard\'s Improvement'\
+             'Algorithm.')
 
         self.params = {'alpha': alpha,
                     'beta': beta,
