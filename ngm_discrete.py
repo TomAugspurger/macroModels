@@ -53,6 +53,28 @@ class NGM(object):
     def __init__(self, alpha=.36, beta=.96, delta=.08, v_0=.01, k_n=1000,
         k_l=.05, k_u=30, epsilon=.00005, z=1, u=np.log, f=None,
         max_iter=1000, n_h=1):
+
+        if not isinstance(alpha, (float, int)):
+            raise Exception
+        if not isinstance(beta, (float, int)):
+            raise Exception
+        if not isinstance(delta, (float, int)):
+            raise Exception
+        if not isinstance(v_0, (float, int, list, np.ndarray)):
+            raise Exception
+        if not isinstance(k_n, int):
+            raise Exception
+        if not isinstance(k_l, (float, int)):
+            raise Exception
+        if not isinstance(k_u, (float, int)):
+            raise Exception
+        if not isinstance(epsilon, (float, int)):
+            raise Exception
+        if not isinstance(max_iter, int):
+            raise Exception
+        if not isinstance(n_h, int):
+            raise Exception
+
         self.params = {'alpha': alpha,
                     'beta': beta,
                     'delta': delta,
@@ -67,6 +89,8 @@ class NGM(object):
                     'max_iter': max_iter,
                     'v_0': v_0,
                     'n_h': n_h}
+
+        # Blank for now. Filled in when model is estimated.
         self.value_function = None
         self.policy_rule = None
         self._is_stochastic = None
