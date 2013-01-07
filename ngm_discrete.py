@@ -29,7 +29,8 @@ class NGM(object):
     * detla: depreciation rate of capital
     * u: a utility function
     * f: a production function
-    * z: currently a placeholder for some stochastic shock matrix.
+    * z: currently a placeholder for some stochastic shock state space.
+    * T: Transition matrix (markov process) for shocks.
     * epsilon: tolerance of error
     * max_iter: Non-economic.  In case something is diverging.
     * n_h: Number of times to reuse current policy rule for value function
@@ -51,9 +52,9 @@ class NGM(object):
 
     """
     def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
-        k_l=.05, k_u=30, epsilon=.00005, z=1, u=(lambda x, h=.7, theta=.5:
+        k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=.7, theta=.5:
         theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
-        k ** alpha), max_iter=1000, n_h=1):
+        k ** alpha), max_iter=1000, n_h=1, z=1, T=None):
 
         if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
             raise Exception('Beta should be a number between zero and one.')
@@ -98,6 +99,9 @@ class NGM(object):
         self.boundry_warning = False
         self.error = None
         self.iterations = None
+
+    # def estimate_shochastic(self):
+
 
     def ngm(self, alt=False, **kwargs):
         """
@@ -196,4 +200,12 @@ class NGM(object):
             self.is_monotonic = True
 
 if __name__ == "main":
-    pass
+    # Stochastic Test:
+    T = np.array([[0.910507618836914, 0.089492259543859, 0.000000121619227],
+        [0.028100505607270, 0.943798980953369, 0.028100513439361],
+        [0.000000121619227, 0.089492259543859, 0.910507618836914]])
+    V = np.array([0.947938865630057, 1, 1.05492035009593])
+    chain = np.zeros([251, 500])
+    for i in range(500):
+        chain[:, i] = markov(T, 252, 1, V)[0]
+
