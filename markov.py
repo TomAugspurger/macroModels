@@ -18,7 +18,7 @@ def markov(T, n=100, s0=0, V=None):
     if np.shape(V) != (r,):
         raise Exception
 
-    x = np.random.rand(n - 1)
+    x = np.random.rand(n)
     s = np.zeros([r, 1])
     s[s0] = 1
     cum = np.dot(T, np.triu(np.ones(T.shape)))
