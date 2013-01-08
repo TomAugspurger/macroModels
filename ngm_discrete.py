@@ -37,7 +37,7 @@ class NGM(object):
     * max_iter: Non-economic.  In case something is diverging.
     * n_h: Number of times to reuse current policy rule for value function
         iteration if using Howard improvement algorithm.
-
+    * s is a function mapping shocks into R. e.g. s(z) = z; or s(z) = e**z.
     Attributes
     ----------
     * ngm(): Solves problem and fills in some other attributes.
@@ -57,7 +57,7 @@ class NGM(object):
         k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=.7, theta=.5:
         theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
         k ** alpha), max_iter=1000, n_h=1, z=1, T=None, simulations=1,
-        periods=1):
+        periods=1, s=lambda z: z):
 
         if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
             raise Exception('Beta should be a number between zero and one.')
@@ -95,7 +95,8 @@ class NGM(object):
                     'n_h': n_h,
                     'simulations': simulations,
                     'periods': periods,
-                    'T': T}
+                    'T': T,
+                    's': s}
 
         # Blank for now. Filled in when model is estimated.
         self.value_function = {}
@@ -133,10 +134,11 @@ class NGM(object):
         v_0 = self.params['v_0']
         n_h = self.params['n_h']
         f = self.params['f']
+        s = self.params['s']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         k_grid = np.tile(k_v, (k_n, 1)).T
-        c = z * f(k_grid) + (1 - delta) * k_grid - k_grid.T
+        c = s(z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
         utility = u(c)
         utility[c <= 0] = -100000
 
