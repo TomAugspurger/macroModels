@@ -43,7 +43,6 @@ df['my_prod'] = df['gdp'] / df['hours']
 
 # Parameters
 
-
 def u(c, h, theta):
     return (1 - theta) * np.log(c) + theta * np.log(1 - h)
 
