@@ -12,6 +12,8 @@ See notes at http://www.compmacro.com/makoto/note/note_ngm_disc.pdf
 
 from __future__ import division
 
+import inspect
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -29,7 +31,7 @@ class NGM(object):
     * k_u: upper boind on capital stock
     * v_0: initial guess.
     * detla: depreciation rate of capital
-    * u: a utility function
+    * utility: A class with utility function, args, constraints.
     * f: a production function
     * z: currently a placeholder for some stochastic shock state space.
     * T: Transition matrix (markov process) for shocks.
@@ -53,12 +55,21 @@ class NGM(object):
 
     TODO: Figure out a way to intelligently handle utility, production, etc.
     functions.  inspect.getargspec() might be helpful.
+
+    Current plan is to make utility, production a class.  Each will define a
+    function, (maybe argmunts (NOT parameters) if I can't figure out the
+    python way of parsing those (**kwargs?)), and a dict? list? of
+    constraints.
+
+    Ok this is going to be harder than I thought.  Need to think on it more.
+    If hours worked is to be a choice variable then the space will get very
+    large very quickly.
     """
     def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
-        k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=.7, theta=.5:
+        k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=1, theta=.5:
         theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
         k ** alpha), max_iter=1000, n_h=1, z=1, T=None, simulations=1,
-        periods=1, s=lambda z: z):
+        periods=1, s=lambda z: z, utility=None):
 
         if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
             raise Exception('Beta should be a number between zero and one.')
@@ -134,8 +145,8 @@ class NGM(object):
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         k_grid = np.tile(k_v, (k_n, 1)).T
         c = s(z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
-        utility = u(c)
-        utility[c <= 0] = -100000
+        _utility = u(c)
+        _utility[c <= 0] = -100000
 
         e = 1
         rep = 1
@@ -147,7 +158,7 @@ class NGM(object):
         while e > epsilon and iteration < max_iter:
             for i, v in enumerate(k_v):
                 if rep == n_h or iteration == 0:
-                    temp = utility[i] + beta * value_function
+                    temp = _utility[i] + beta * value_function
                     ind = np.argmax(temp)
                     policy_rule[i] = k_v[ind]
                     rep = 1
