@@ -15,6 +15,8 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
+from markov import markov
+
 
 class NGM(object):
     """Calculate a neoclassical growth model using value function iteration.
@@ -54,7 +56,8 @@ class NGM(object):
     def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
         k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=.7, theta=.5:
         theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
-        k ** alpha), max_iter=1000, n_h=1, z=1, T=None):
+        k ** alpha), max_iter=1000, n_h=1, z=1, T=None, simulations=1,
+        periods=1):
 
         if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
             raise Exception('Beta should be a number between zero and one.')
@@ -89,22 +92,25 @@ class NGM(object):
                     'f': f,
                     'max_iter': max_iter,
                     'v_0': v_0,
-                    'n_h': n_h}
+                    'n_h': n_h,
+                    'simulations': simulations,
+                    'periods': periods,
+                    'T': T}
 
         # Blank for now. Filled in when model is estimated.
-        self.value_function = None
-        self.policy_rule = None
+        self.value_function = {}
+        self.policy_rule = {}
         self._is_stochastic = None
         self.is_monotonic = None
         self.boundry_warning = False
         self.error = None
         self.iterations = None
 
-    # def estimate_shochastic(self):
-
-
-    def ngm(self, alt=False, **kwargs):
+    def ngm(self, attr_num=1, z=1, **kwargs):
         """
+        attr_num: Crummy way to accept multiple value functions for
+            stochastic case.
+
         Call like vf, pr = NGM.ngm()
 
         If alt, calculation of c & u is done in loop. Else it is done before.
@@ -119,7 +125,6 @@ class NGM(object):
         k_l = self.params['k_l']
         k_u = self.params['k_u']
         k_n = self.params['k_n']
-        z = self.params['z']
         beta = self.params['beta']
         delta = self.params['delta']
         epsilon = self.params['epsilon']
@@ -131,7 +136,7 @@ class NGM(object):
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         k_grid = np.tile(k_v, (k_n, 1)).T
-        c = f(k_grid) + (1 - delta) * k_grid - k_grid.T
+        c = z * f(k_grid) + (1 - delta) * k_grid - k_grid.T
         utility = u(c)
         utility[c <= 0] = -100000
 
@@ -167,8 +172,8 @@ class NGM(object):
         print('Finished in %i iterations.' % iteration)
         self.error = e
         self.iterations = iteration
-        self.value_function = value_function
-        self.policy_rule = policy_rule
+        self.value_function[attr_num] = value_function
+        self.policy_rule[attr_num] = policy_rule
         return (value_function, policy_rule)
 
     def gen_plots(self, value_function, policy_rule):
@@ -196,16 +201,27 @@ class NGM(object):
     def _is_monotonic(self, vf, pr):
         """Check if the value function/policy rule is monotionic.
         """
-        if sorted(vf) == vf and sorted(pr) == pr:
+        if vf.sort() == vf and pr == pr.sort():
             self.is_monotonic = True
+
+    def estimate_stochastic(self):
+        # This currently works but I need to review the difference between
+        # periods & simulations.
+        T = self.params['T']
+        z = self.params['z']
+        r_c = z.shape
+        simulations = self.params['simulations']
+        periods = self.params['periods']
+        chain = np.zeros([periods, simulations])
+        for i in range(simulations):
+            chain[:, i] = markov(T, periods, 1, z)[0].T
 
 if __name__ == "main":
     # Stochastic Test:
     T = np.array([[0.910507618836914, 0.089492259543859, 0.000000121619227],
         [0.028100505607270, 0.943798980953369, 0.028100513439361],
         [0.000000121619227, 0.089492259543859, 0.910507618836914]])
-    V = np.array([0.947938865630057, 1, 1.05492035009593])
+    z = np.array([0.947938865630057, 1, 1.05492035009593])
     chain = np.zeros([251, 500])
     for i in range(500):
-        chain[:, i] = markov(T, 252, 1, V)[0]
-
+        chain[:, i] = markov(T, 252, 1, z)[0].T
