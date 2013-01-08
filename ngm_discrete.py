@@ -51,7 +51,8 @@ class NGM(object):
         restricting the optimal next period capital choice.
 
 
-
+    TODO: Figure out a way to intelligently handle utility, production, etc.
+    functions.  inspect.getargspec() might be helpful.
     """
     def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
         k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=.7, theta=.5:
@@ -114,12 +115,6 @@ class NGM(object):
 
         Call like vf, pr = NGM.ngm()
 
-        If alt, calculation of c & u is done in loop. Else it is done before.
-        Getting different results since the updateding of value_function occurs
-        at different times. Alt fixes value_function and loops over each k.
-        Non-alt updates value_function after each iteration.  Lean toward alt?
-
-        Non-alt running a bit under 3x slower.
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for single value.
         """
