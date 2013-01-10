@@ -52,38 +52,29 @@ def silly_bea(f):
     """
     lines = f.readlines()
     # metadata = l[:4]
-    ret = []
-    for line in lines[4:]:
-        ret.append(line.replace('\xa0', ''))
     s = []
-    for line in ret:
-        s.append(line.split(','))
+    for line in lines[4:]:
+        s.append(line.replace('\xa0', '').split(','))
     df = pd.DataFrame(s)
-    df2 = df.ix[0:13].T
-    df2 = df2[1:]
-    idx = df2[0]
-    idx = [x.strip('"').rstrip('"\r\n') for x in idx]
-    idx[0] = 0
-    idx = [int(x) for x in idx]
+    df2 = df.ix[0:13].T[1][2:]
+    idx = df.ix[0:13].T[0][2:]
+    idx = idx.apply(lambda x: x.strip('"').rstrip('"\r\n'))
 
     df2.index = idx
-    del df2[0]
-    df2 = df2.applymap(lambda x: x.strip('"\r\n'))
+    df2 = df2.apply(lambda x: x.strip('"\r\n'))
+    df2.name = df.ix[1][1].strip('"')
 
-    df2 = df2[1]
-    df2.name = df2[0]
-    df2 = df2[1:]
     return df2
 
 with open('capital_stock.csv') as f:
     df_k = silly_bea(f)
 
 # For some reason 1947 (first one) isn't included.
-df_k.index = pd.date_range(str(df_k.index[0] - 1), periods=len(df_k),
+df_k.index = pd.date_range(df_k.index[0] + '-01-01', periods=len(df_k),
     freq='AS-JAN')
 df_k = df_k.asfreq('QS-JAN', method='ffill')
+df['k'] = df_k.fillna(method='ffill', limit=3)
 
-df['k'] = df_k
 # Parameters
 
 
