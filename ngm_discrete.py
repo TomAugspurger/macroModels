@@ -129,18 +129,12 @@ class NGM(object):
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for single value.
         """
-        k_l = self.params['k_l']
-        k_u = self.params['k_u']
-        k_n = self.params['k_n']
-        beta = self.params['beta']
-        delta = self.params['delta']
-        epsilon = self.params['epsilon']
-        u = self.params['u']
-        max_iter = self.params['max_iter']
-        v_0 = self.params['v_0']
-        n_h = self.params['n_h']
-        f = self.params['f']
-        s = self.params['s']
+        k_l, k_u = self.params['k_l'], self.params['k_u']
+        k_n, beta = self.params['k_n'], self.params['beta']
+        delta, epsilon = self.params['delta'], self.params['epsilon']
+        u, max_iter = self.params['u'], self.params['max_iter']
+        v_0, n_h = self.params['v_0'], self.params['n_h']
+        f, s = self.params['f'], self.params['s']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         k_grid = np.tile(k_v, (k_n, 1)).T
