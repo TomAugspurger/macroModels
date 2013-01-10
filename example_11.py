@@ -73,7 +73,8 @@ with open('capital_stock.csv') as f:
 df_k.index = pd.date_range(df_k.index[0] + '-01-01', periods=len(df_k),
     freq='AS-JAN')
 df_k = df_k.asfreq('QS-JAN', method='ffill')
-df['k'] = df_k.fillna(method='ffill', limit=3)
+df['k'] = df_k
+df['k'] = df['k'].fillna(method='ffill', limit=3)
 
 # Parameters
 
