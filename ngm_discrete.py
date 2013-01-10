@@ -126,6 +126,12 @@ class NGM(object):
 
         Call like vf, pr = NGM.ngm()
 
+        For multple cases (e.g. z = np.array([0.9479, 1, 1.0549]) do
+            for i, v in enumerate(z):
+                model.ngm(attr_num=i, z=v)
+
+        and then vf1, vf2, vf3 = model.value_function.values()
+        and      pr1, pr2, pr3 = model.policy_rule.values()
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for single value.
         """
@@ -137,6 +143,7 @@ class NGM(object):
         f, s = self.params['f'], self.params['s']
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
+        self.k_v = k_v
         k_grid = np.tile(k_v, (k_n, 1)).T
         c = s(z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
         _utility = u(c)
@@ -178,14 +185,20 @@ class NGM(object):
         self.policy_rule[attr_num] = policy_rule
         return (value_function, policy_rule)
 
-    def gen_plots(self, value_function, policy_rule):
+    def gen_plots(self, value_function, policy_rule, fig=None):
         """Get a plot of the value function & policy rules.
+        Handling for multiplots.  If you want to add to an existing
+        plot (say multiple vf/pr's) pass that figure as fig.
+        Defualt is to return a new figure.
         """
         k_l = self.params['k_l']
         k_u = self.params['k_u']
         k_n = self.params['k_n']
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
-        fig = plt.figure()
+        if fig is None:
+            fig = plt.figure()
+        else:
+            fig = fig
         ax1 = fig.add_subplot(2, 1, 1)
         ax1.plot(k_v, value_function)
         ax2 = fig.add_subplot(2, 1, 2)
