@@ -10,7 +10,21 @@ from tools.StepFun import StepFun
 
 class ngm_continuous:
     def __init__(self, step, params):
-        """
+        """Estimate a value function and policy rule in continuous space.
+
+        Parameters
+        ----------
+
+        * step : An instance of StepFun.
+
+        params includes:
+        * utility : A class with attributes including a utility function
+            (along with any parameters), and a discount factor beta.
+        * L : A distribution (e.g. lognormal)
+        * G : The cdf of distribution L.
+        * gridsize : Int with the number of points in the grid.
+        * grid : Grid to iterate on.
+        * f : A production function (e.g. k ** alpha)
         """
         self.utility = params['utility']
         self.L = params['distribution']
@@ -28,7 +42,7 @@ class ngm_continuous:
         return lambda x: G(x / c)
 
     def arg_maximum(self, h, a, b):
-        """Compute max of h on [a, b]."""
+        """Compute argmax of a function h on [a, b]."""
         return fminbound(lambda x: -h(x), a, b)
 
     def bellman(self, w):

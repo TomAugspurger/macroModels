@@ -12,7 +12,7 @@ from ngm_continuous import ngm_continuous
 theta, alpha, beta = .5, .8, .9
 
 u_params = {'U': lambda c: 1 - np.exp(-theta * c),
-        'theta': theta, 'alpha': alpha, 'beta': beta}
+        'theta': theta, 'beta': beta}
 
 
 class Utility:
@@ -21,7 +21,6 @@ class Utility:
     def __init__(self, u_params):
         self.U = u_params['U']
         self.theta = u_params['theta']
-        self.alpha = u_params['alpha']
         self.beta = u_params['beta']
 
 utility = Utility(u_params)
