@@ -13,3 +13,4 @@ Authors
 -------
 
 * Tom Augspurger
+* Caleb Floyd
