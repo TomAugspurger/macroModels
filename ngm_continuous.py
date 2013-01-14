@@ -3,9 +3,12 @@
 
 from __future__ import division
 
+import types
+
 import numpy as np
 from scipy.optimize import fminbound
 from tools.StepFun import StepFun
+from tools.linear_interpolation import LinInterp
 
 
 class ngm_continuous:
@@ -27,11 +30,18 @@ class ngm_continuous:
         * f : A production function (e.g. k ** alpha)
         """
         self.utility = params['utility']
-        self.L = params['distribution']
-        self.G = params['cdf']
+        try:
+            self.L = params['distribution']
+            self.G = params['cdf']
+        except KeyError:
+            self.L, self.G = None, None
         self.gridsize = params['gridsize']
         self.grid = params['grid']
         self.f = params['f']
+        try:
+            self.W = params['W']
+        except KeyError:
+            self.W = None
 
     def cum_dist_fctn(self, G, c):
         """Returns the cdf of c * W.
@@ -59,12 +69,23 @@ class ngm_continuous:
 
         * New instance of StepFun.
         """
-        Tw = np.empty(self.gridsize)
-        g = np.empty(self.gridsize)
-        for i, y in enumerate(self.grid):
-            h = lambda k: self.utility.U(y - k) + self.utility.beta * w.expectation(
-                self.cum_dist_fctn(self.G, self.f(k)))
-            g[i] = self.arg_maximum(h, 0, y)
-            Tw[i] = h(g[i])
+        if isinstance(w, StepFun):
+            Tw = np.empty(self.gridsize)
+            g = np.empty(self.gridsize)
+            for i, y in enumerate(self.grid):
+                h = lambda k: self.utility.U(y - k) + self.utility.beta * w.expectation(
+                    self.cum_dist_fctn(self.G, self.f(k)))
+                g[i] = self.arg_maximum(h, 0, y)
+                Tw[i] = h(g[i])
 
-        return (StepFun(self.grid, Tw), g)
+            return (StepFun(self.grid, Tw), g)
+        elif isinstance(w, (LinInterp, types.FunctionType)):
+                pr = []
+                vals = []
+                for y in self.grid:
+                    h = lambda k: self.utility.U(y - k) + self.utility.beta * (
+                        np.mean(w(self.f(k, self.W))))
+                    temp = self.arg_maximum(h, 0, y)
+                    pr.append(temp)
+                    vals.append(h(temp))
+                return (LinInterp(self.grid, vals), pr)
