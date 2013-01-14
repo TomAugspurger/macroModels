@@ -1,4 +1,13 @@
-Collection of macro models.  For science!
+Collection of macro models.
+
+Dependencies
+-------------
+
+* numpy
+* scipy
+* matplotlib
+* pandas
+* statsmodels (eventually?)
 
 Authors
 -------
