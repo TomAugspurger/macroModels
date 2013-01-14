@@ -228,5 +228,8 @@ class NGM(object):
         for i in range(simulations):
             chain[:, i] = markov(T, periods, 1, z)[0].T
 
+    def nothhing(self):
+        pass
+
 if __name__ == "main":
     pass
