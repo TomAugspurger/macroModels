@@ -47,7 +47,7 @@ class ngm_continuous:
         """
         Tw = np.empty(self.gridsize)
         for i, y in enumerate(self.grid):
-            h = lambda k: self.utility.U(y - k) + self.utility.rho * w.expectation(
+            h = lambda k: self.utility.U(y - k) + self.utility.beta * w.expectation(
                 self.cum_dist_fctn(self.G, self.f(k)))
             Tw[i] = self.maximum(h, 0, y)
 

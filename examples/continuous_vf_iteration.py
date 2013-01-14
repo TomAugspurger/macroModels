@@ -9,10 +9,10 @@ from scipy.stats import lognorm
 from tools.StepFun import StepFun
 from ngm_continuous import ngm_continuous
 
-theta, alpha, rho = .5, .8, .9
+theta, alpha, beta = .5, .8, .9
 
 u_params = {'U': lambda c: 1 - np.exp(-theta * c),
-        'theta': theta, 'alpha': alpha, 'rho': rho}
+        'theta': theta, 'alpha': alpha, 'beta': beta}
 
 
 class Utility:
@@ -22,7 +22,7 @@ class Utility:
         self.U = u_params['U']
         self.theta = u_params['theta']
         self.alpha = u_params['alpha']
-        self.rho = u_params['rho']
+        self.beta = u_params['beta']
 
 utility = Utility(u_params)
 
