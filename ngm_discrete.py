@@ -167,8 +167,7 @@ class NGM(object):
                         self.boundry_warning = True
                 else:
                     rep += 1
-                temp_vf = temp[ind]
-                new_value_function[i] = temp_vf
+                new_value_function[i] = temp[ind]
             e = np.max(np.abs(value_function - new_value_function))
             iteration += 1
             value_function = np.copy(new_value_function)
