@@ -12,12 +12,10 @@ See notes at http://www.compmacro.com/makoto/note/note_ngm_disc.pdf
 
 from __future__ import division
 
-import inspect
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from markov import markov
+from tools.markov import markov
 
 
 class NGM(object):
@@ -224,7 +222,6 @@ class NGM(object):
         # periods & simulations.
         T = self.params['T']
         z = self.params['z']
-        r_c = z.shape
         simulations = self.params['simulations']
         periods = self.params['periods']
         chain = np.zeros([periods, simulations])
@@ -232,11 +229,4 @@ class NGM(object):
             chain[:, i] = markov(T, periods, 1, z)[0].T
 
 if __name__ == "main":
-    # Stochastic Test:
-    T = np.array([[0.910507618836914, 0.089492259543859, 0.000000121619227],
-        [0.028100505607270, 0.943798980953369, 0.028100513439361],
-        [0.000000121619227, 0.089492259543859, 0.910507618836914]])
-    z = np.array([0.947938865630057, 1, 1.05492035009593])
-    chain = np.zeros([251, 500])
-    for i in range(500):
-        chain[:, i] = markov(T, 252, 1, z)[0].T
+    pass
