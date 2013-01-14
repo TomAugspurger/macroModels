@@ -27,9 +27,9 @@ class ngm_continuous:
             return np.vectorize(lambda x: x if x < 0 else 1)
         return lambda x: G(x / c)
 
-    def maximum(self, h, a, b):
+    def arg_maximum(self, h, a, b):
         """Compute max of h on [a, b]."""
-        return h(fminbound(lambda x: -h(x), a, b))
+        return fminbound(lambda x: -h(x), a, b)
 
     def bellman(self, w):
         """
@@ -46,9 +46,11 @@ class ngm_continuous:
         * New instance of StepFun.
         """
         Tw = np.empty(self.gridsize)
+        g = np.empty(self.gridsize)
         for i, y in enumerate(self.grid):
             h = lambda k: self.utility.U(y - k) + self.utility.beta * w.expectation(
                 self.cum_dist_fctn(self.G, self.f(k)))
-            Tw[i] = self.maximum(h, 0, y)
+            g[i] = self.arg_maximum(h, 0, y)
+            Tw[i] = h(g[i])
 
-        return StepFun(self.grid, Tw)
+        return (StepFun(self.grid, Tw), g)
