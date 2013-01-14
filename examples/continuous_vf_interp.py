@@ -35,12 +35,17 @@ params = {'utility': utility, 'distribution': None, 'cdf': None,
 
 
 c = ngm_continuous(v, params)
+
+iteration = 1
 while 1:
     plt.plot(grid, v(grid), 'k-')
     new_v = c.bellman(v)[0]
     if max(abs(new_v(grid) - v(grid))) < tol:
         break
+        c.iterations = iteration
+        c.error = max(abs(new_v(grid) - v(grid)))
     v = new_v
+    iteration += 1
 
 plt.show()
 

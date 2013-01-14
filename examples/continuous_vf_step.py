@@ -38,12 +38,16 @@ params = {'utility': utility, 'distribution': L, 'cdf': G,
     'gridsize': gridsize, 'grid': grid, 'tol': tol, 'f': f}
 
 c = ngm_continuous(v, params)
+iteration = 1
 while 1:
     plt.plot(grid, v.Y, 'k--')
     new_v = c.bellman(v)[0]
     if max(abs(new_v.Y - v.Y)) < tol:
+        c.iterations = iteration
+        c.error = max(abs(new_v.Y - v.Y))
         break
     v = new_v
+    iteration += 1
 
 plt.show()
 
