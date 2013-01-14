@@ -12,13 +12,14 @@ class ngm_continuous:
     def __init__(self, step, params):
         """
         """
-        self.U = params.utility
-        self.L = params.distribution
-        self.G = params.cdf
-        self.gridmax, self.gridsize = params.gridmax, params.gridsize
-        self.grid = params.grid
+        self.utility = params['utility']
+        self.L = params['distribution']
+        self.G = params['cdf']
+        self.gridsize = params['gridsize']
+        self.grid = params['grid']
+        self.f = params['f']
 
-    def cum_dist_fctn(self, c, G):
+    def cum_dist_fctn(self, G, c):
         """Returns the cdf of c * W.
         e.g. c is a constant and W is lognormal.
         """
@@ -30,7 +31,7 @@ class ngm_continuous:
         """Compute max of h on [a, b]."""
         return h(fminbound(lambda x: -h(x), a, b))
 
-    def bellman(self, w, gridsize):
+    def bellman(self, w):
         """
         Approximate the Bellman operator.
 
@@ -44,10 +45,10 @@ class ngm_continuous:
 
         * New instance of StepFun.
         """
-        Tw = np.empty(gridsize)
+        Tw = np.empty(self.gridsize)
         for i, y in enumerate(self.grid):
-            h = lambda k: self.U(y - k) + self.U.rho * w.expectation(
-                self.cum_dist_fctn(k ** self.U.alpha))
+            h = lambda k: self.utility.U(y - k) + self.utility.rho * w.expectation(
+                self.cum_dist_fctn(self.G, self.f(k)))
             Tw[i] = self.maximum(h, 0, y)
 
         return StepFun(self.grid, Tw)
