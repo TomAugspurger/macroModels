@@ -257,19 +257,5 @@ class NGM(object):
         if vf.sort() == vf and pr == pr.sort():
             self.is_monotonic = True
 
-    def estimate_stochastic(self):
-        # This currently works but I need to review the difference between
-        # periods & simulations.
-        T = self.params['T']
-        z = self.params['z']
-        simulations = self.params['simulations']
-        periods = self.params['periods']
-        chain = np.zeros([periods, simulations])
-        for i in range(simulations):
-            chain[:, i] = markov(T, periods, 1, z)[0].T
-
-    def nothhing(self):
-        pass
-
 if __name__ == "main":
     pass
