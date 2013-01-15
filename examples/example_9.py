@@ -13,7 +13,7 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
-from test_stochastic import NGM
+from ngm_discrete import NGM
 from tools.stochastic import Stochastic
 
 # Parameters
