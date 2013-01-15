@@ -63,7 +63,8 @@ class NGM(object):
     If hours worked is to be a choice variable then the space will get very
     large very quickly.
     """
-    def __init__(self, beta=.92, delta=.08, v_0=.01, k_n=1000,
+
+    def __init__(self, beta=.95, delta=.08, v_0=.01, k_n=1000,
         k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=1, theta=.5:
         theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
         k ** alpha), max_iter=1000, n_h=1, z=1, T=None, simulations=1,
