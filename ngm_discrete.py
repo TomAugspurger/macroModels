@@ -15,7 +15,6 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tools.markov import markov
 from tools.stochastic import Stochastic
 
 
@@ -32,7 +31,7 @@ class NGM(object):
     * detla: depreciation rate of capital
     * utility: A class with utility function, args, constraints.
     * f: a production function
-    * z: currently a placeholder for some stochastic shock state space.
+    * z: Class describing stochasticity (space & transition matrix) or 1.
     * T: Transition matrix (markov process) for shocks.
     * epsilon: tolerance of error
     * max_iter: Non-economic.  In case something is diverging.
@@ -176,6 +175,7 @@ class NGM(object):
                             self.boundry_warning = True
                     else:
                         rep += 1
+                    temp = _utility[i] + beta * value_function
                     new_value_function[i] = temp[ind]
                 e = np.max(np.abs(value_function - new_value_function))
                 iteration += 1
