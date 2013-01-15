@@ -16,6 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from tools.markov import markov
+from tools.stochastic import Stochastic
 
 
 class NGM(object):
@@ -111,13 +112,18 @@ class NGM(object):
         # Blank for now. Filled in when model is estimated.
         self.value_function = {}
         self.policy_rule = {}
-        self._is_stochastic = None
+        if isinstance(z, Stochastic):
+            self.Z = z
+            self._is_stochastic = True
+        else:
+            self.Z = 1
+            self._is_stochastic = False
         self.is_monotonic = None
         self.boundry_warning = False
         self.error = None
         self.iterations = None
 
-    def ngm(self, attr_num=1, z=1, **kwargs):
+    def ngm(self, attr_num=1, **kwargs):
         """
         attr_num: Crummy way to accept multiple value functions for
             stochastic case.
@@ -143,43 +149,78 @@ class NGM(object):
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         self.k_v = k_v
         k_grid = np.tile(k_v, (k_n, 1)).T
-        c = s(z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
-        _utility = u(c)
-        _utility[c <= 0] = -100000
 
         e = 1
         rep = 1
         iteration = 0
-        value_function = np.ones(k_n) * v_0
-        new_value_function = np.zeros(k_n)
-        policy_rule = np.zeros(k_n)
 
-        while e > epsilon and iteration < max_iter:
-            for i, v in enumerate(k_v):
-                if rep == n_h or iteration == 0:
-                    temp = _utility[i] + beta * value_function
-                    ind = np.argmax(temp)
-                    policy_rule[i] = k_v[ind]
-                    rep = 1
-                    if ind in [0, k_n - 1] and iteration > 0:
-                        print("Boundry Warning.  Chose %i on iteration %i"
-                            % (ind, iteration))
-                        self.boundry_warning = True
-                else:
-                    rep += 1
-                new_value_function[i] = temp[ind]
-            e = np.max(np.abs(value_function - new_value_function))
-            iteration += 1
-            value_function = np.copy(new_value_function)
-            if iteration % 10 == 0:
-                print "For iteration %i, the error is %.6e" % (iteration, e)
+        if not self._is_stochastic:  # Deterministic case.
+            c = s(self.Z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
+            _utility = u(c)
+            _utility[c <= 0] = -100000
+
+            value_function = np.ones(k_n) * v_0
+            new_value_function = np.zeros(k_n)
+            policy_rule = np.zeros(k_n)
+
+            while e > epsilon and iteration < max_iter:
+                for i, v in enumerate(k_v):
+                    if rep == n_h or iteration == 0:
+                        temp = _utility[i] + beta * value_function
+                        ind = np.argmax(temp)
+                        policy_rule[i] = k_v[ind]
+                        rep = 1
+                        if ind in [0, k_n - 1] and iteration > 0:
+                            print("Boundry Warning.  Chose %i on iteration %i"
+                                % (ind, iteration))
+                            self.boundry_warning = True
+                    else:
+                        rep += 1
+                    new_value_function[i] = temp[ind]
+                e = np.max(np.abs(value_function - new_value_function))
+                iteration += 1
+                value_function = np.copy(new_value_function)
+                if iteration % 10 == 0:
+                    print "For iteration %i, the error is %.6e" % (iteration, e)
+        else:
+            c = np.zeros((k_n, k_n, self.Z.size))
+
+            for i, v in enumerate(self.Z.z):
+                c[:, :, i] = s(v) * f(k_grid) - k_grid.T
+            _utility = u(c)
+            _utility[c <= 0] = -100000
+
+            value_function = np.tile(np.log(k_v), (self.Z.size, 1)).T
+            new_value_function = np.zeros([k_n, self.Z.size])
+            policy_rule = np.zeros([k_n, self.Z.size])
+
+            while e > epsilon and iteration < max_iter:
+                for j, w in enumerate(self.Z.z):
+                    for i, v in enumerate(k_v):
+                        if rep == n_h or iteration == 0:
+                            temp = _utility[i, :, j] + beta * value_function[:, j]
+                            ind = np.argmax(temp)
+                            policy_rule[i, j] = k_v[ind]
+                            rep = 1
+                            if ind in [0, k_n - 1] and iteration > 0:
+                                print("Boundry Warning.  Chose %i on iteration %i"
+                                    % (ind, iteration))
+                                self.boundry_warning = True
+                        else:
+                            rep += 1
+                        new_value_function[i, j] = temp[ind]
+                e = np.max(np.abs(value_function - new_value_function))
+                iteration += 1
+                value_function = np.copy(new_value_function)
+                if iteration % 10 == 0:
+                    print "For iteration %i, the error is %.6e" % (iteration, e)
 
         print('The final error is %.6e.' % e)
         print('Finished in %i iterations.' % iteration)
         self.error = e
         self.iterations = iteration
-        self.value_function[attr_num] = value_function
-        self.policy_rule[attr_num] = policy_rule
+        self.value_function = value_function
+        self.policy_rule = policy_rule
         return (value_function, policy_rule)
 
     def gen_plots(self, value_function, policy_rule, fig=None):
