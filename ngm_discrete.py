@@ -15,8 +15,6 @@ from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 
-from tools.stochastic import Stochastic
-
 
 class NGM(object):
     """Calculate a neoclassical growth model using value function iteration.
@@ -63,60 +61,21 @@ class NGM(object):
     If hours worked is to be a choice variable then the space will get very
     large very quickly.
     """
-    def __init__(self, beta=.96, delta=.08, v_0=.01, k_n=1000,
-        k_l=.05, k_u=30, epsilon=.00005, u=(lambda x, h=1, theta=.5:
-        theta * np.log(x) + (1 - theta) * np.log(h)), f=(lambda k, alpha=.36:
-        k ** alpha), max_iter=1000, n_h=1, z=1, T=None, simulations=1,
-        periods=1, s=lambda z: z, utility=None):
-
-        if not isinstance(beta, (float, int)) or beta < 0 or beta > 1:
-            raise Exception('Beta should be a number between zero and one.')
-        if not isinstance(delta, (float, int)) or delta < 0 or delta > 1:
-            raise Exception('delta should be a number between zero and one.')
-        if not isinstance(v_0, (float, int, list, np.ndarray)):
-            raise Exception('Invalid initial value function.')
-        if not isinstance(k_n, int):
-            raise Exception('Invalid numper of points.  Must be an int.')
-        if not isinstance(k_l, (float, int)):
-            raise Exception('Invalid lower bound.')
-        if not isinstance(k_u, (float, int)):
-            raise Exception('Invalid upper bound.')
-        if not isinstance(epsilon, (float, int)):
-            raise Exception('Invalid tolerance level.')
-        if not isinstance(max_iter, (float, int)):
-            raise Exception('Invalid maximum iterations.')
-        if not isinstance(n_h, int):
-            raise Exception('Invlaid number for Howard\'s Improvement'\
-             'Algorithm.')
-
-        self.params = {
-                    'beta': beta,
-                    'delta': delta,
-                    'v_0': v_0,
-                    'k_n': k_n,
-                    'k_l': k_l,
-                    'k_u': k_u,
-                    'epsilon': epsilon,
-                    'z': z,
-                    'u': u,
-                    'f': f,
-                    'max_iter': max_iter,
-                    'v_0': v_0,
-                    'n_h': n_h,
-                    'simulations': simulations,
-                    'periods': periods,
-                    'T': T,
-                    's': s}
-
-        # Blank for now. Filled in when model is estimated.
+    def __init__(self, Economy):
+        self.Economy = Economy
+        self.Preferences = Economy.Preferences
+        self.Technology = Economy.Technology
+        self.Model = Economy.Model
+        self.Stochastic = Economy.Stochastic
         self.value_function = {}
         self.policy_rule = {}
-        if isinstance(z, Stochastic):
-            self.Z = z
-            self._is_stochastic = True
-        else:
-            self.Z = 1
+        if self.Economy.Stochastic is None:
+            self.shock_space = 1
             self._is_stochastic = False
+        else:
+            self.shock_space = self.Economy.Stochastic.shock_space
+            self._is_stochastic = True
+
         self.is_monotonic = None
         self.boundry_warning = False
         self.error = None
@@ -138,12 +97,10 @@ class NGM(object):
         TODO: Takes args from self.params as a dict
         TODO: Improve v_0 handling.  Right now just allows for single value.
         """
-        k_l, k_u = self.params['k_l'], self.params['k_u']
-        k_n, beta = self.params['k_n'], self.params['beta']
-        delta, epsilon = self.params['delta'], self.params['epsilon']
-        u, max_iter = self.params['u'], self.params['max_iter']
-        v_0, n_h = self.params['v_0'], self.params['n_h']
-        f, s = self.params['f'], self.params['s']
+        beta = self.Preferences.discount
+        k_l = self.Model.k_l
+        k_u = self.Model.k_u
+        k_n = self.Model.k_n
 
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n, dtype='float')
         self.k_v = k_v
@@ -154,17 +111,18 @@ class NGM(object):
         iteration = 0
 
         if not self._is_stochastic:  # Deterministic case.
-            c = s(self.Z) * f(k_grid) + (1 - delta) * k_grid - k_grid.T
-            _utility = u(c)
+            c = self.Technology.F(k_grid) + (1 - self.Technology.depreciation
+                ) * k_grid - k_grid.T
+            _utility = self.Preferences.U(c)
             _utility[c <= 0] = -100000
 
-            value_function = np.ones(k_n) * v_0
-            new_value_function = np.zeros(k_n)
-            policy_rule = np.zeros(k_n)
+            value_function = np.ones(k_n) * self.Model.v_0
+            new_value_function = np.zeros(self.Model.k_n)
+            policy_rule = np.zeros(self.Model.k_n)
 
-            while e > epsilon and iteration < max_iter:
+            while e > self.Model.epsilon and iteration < self.Model.max_iter:
                 for i, v in enumerate(k_v):
-                    if rep == n_h or iteration == 0:
+                    if rep == self.Model.n_h or iteration == 0:
                         temp = _utility[i] + beta * value_function
                         ind = np.argmax(temp)
                         policy_rule[i] = k_v[ind]
@@ -183,21 +141,22 @@ class NGM(object):
                 if iteration % 10 == 0:
                     print "For iteration %i, the error is %.6e" % (iteration, e)
         else:
-            c = np.zeros((k_n, k_n, self.Z.size))
+            c = np.zeros((k_n, k_n, self.Stochastic.size))
 
-            for i, v in enumerate(self.Z.z):
-                c[:, :, i] = s(v) * f(k_grid) - k_grid.T
-            _utility = u(c)
+            for i, v in enumerate(self.shock_space):
+                c[:, :, i] = self.Stochastic.form(v) * self.Technology.F(k_grid)\
+                    - k_grid.T
+            _utility = self.Preferences.U(c)
             _utility[c <= 0] = -100000
 
-            value_function = np.tile(np.log(k_v), (self.Z.size, 1)).T
-            new_value_function = np.zeros([k_n, self.Z.size])
-            policy_rule = np.zeros([k_n, self.Z.size])
+            value_function = np.tile(np.log(k_v), (self.Stochastic.size, 1)).T
+            new_value_function = np.zeros([k_n, self.Stochastic.size])
+            policy_rule = np.zeros([k_n, self.Stochastic.size])
 
-            while e > epsilon and iteration < max_iter:
-                for j, w in enumerate(self.Z.z):
+            while e > self.Model.epsilon and iteration < self.Model.max_iter:
+                for j, w in enumerate(self.shock_space):
                     for i, v in enumerate(k_v):
-                        if rep == n_h or iteration == 0:
+                        if rep == self.Model.n_h or iteration == 0:
                             temp = _utility[i, :, j] + beta * value_function[:, j]
                             ind = np.argmax(temp)
                             policy_rule[i, j] = k_v[ind]
@@ -219,8 +178,8 @@ class NGM(object):
         print('Finished in %i iterations.' % iteration)
         self.error = e
         self.iterations = iteration
-        self.value_function = value_function
-        self.policy_rule = policy_rule
+        self.value_function[attr_num] = value_function
+        self.policy_rule[attr_num] = policy_rule
         return (value_function, policy_rule)
 
     def gen_plots(self, value_function, policy_rule, fig=None):
@@ -229,9 +188,9 @@ class NGM(object):
         plot (say multiple vf/pr's) pass that figure as fig.
         Defualt is to return a new figure.
         """
-        k_l = self.params['k_l']
-        k_u = self.params['k_u']
-        k_n = self.params['k_n']
+        k_l = self.Model.k_l
+        k_u = self.Model.k_u
+        k_n = self.Model.k_n
         k_v = np.arange(k_l, k_u, (k_u - k_l) / k_n)
         if fig is None:
             fig = plt.figure()
